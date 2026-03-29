@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StrongBox - Secure Crypto Vault</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap"
+        rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Ethers.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="blob-bg"></div>
+
+    <main class="app-container">
+
+        <!-- ==============================
+             VIEW 1: Login
+             ============================== -->
+        <section id="view-login" class="view active">
+            <div class="card glass">
+                <div class="logo-container">
+                    <div class="logo-icon"></div>
+                    <h1>StrongBox</h1>
+                </div>
+                <p class="subtitle">Secure your assets for the future.</p>
+                <center><button id="btn-connect" class="btn primary-btn pulse-glow">Connect MetaMask</button></center>
+                <p id="conn-status" class="status-msg"></p>
+            </div>
+        </section>
+
+        <!-- ==============================
+             VIEW 2: Main Dashboard Menu
+             ============================== -->
+        <section id="view-main-menu" class="view hidden">
+            <header class="app-header">
+                <h2>Welcome, <span id="display-wallet" class="accent-text">0x...</span></h2>
+                <button id="btn-logout" class="btn sm-btn outline-btn">Disconnect</button>
+            </header>
+
+            <div class="menu-grid">
+                <div class="menu-card glass interactive" id="btn-nav-create">
+                    <div class="icon create-icon"></div>
+                    <h3>Create Strong Box</h3>
+                    <p>Setup a new secure vault with guardians and heirs.</p>
+                </div>
+                <div class="menu-card glass interactive" id="btn-nav-heir">
+                    <div class="icon heir-icon"></div>
+                    <h3>I am Heir</h3>
+                    <p>Check if you can inherit funds from a lost vault.</p>
+                </div>
+                <div class="menu-card glass interactive" id="btn-nav-guardian">
+                    <div class="icon guardian-icon"></div>
+                    <h3>I am Guardian</h3>
+                    <p>Review pending withdrawal requests from users.</p>
+                </div>
+                <div class="menu-card glass interactive" id="btn-nav-owner">
+                    <div class="icon vault-icon"></div>
+                    <h3>My StrongBox</h3>
+                    <p>Manage your vault, deposit or withdraw funds.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==============================
+             VIEW 3: Heir Dashboard
+             ============================== -->
+        <section id="view-heir" class="view hidden">
+            <button class="nav-back btn sm-btn outline-btn mb-1">← Back</button>
+            <div class="card glass wide">
+                <h2>Heir <span class="accent-text">Dashboard</span></h2>
+                <div class="input-group">
+                    <label>StrongBox Address</label>
+                    <input type="text" id="heir-sb-address" placeholder="0x...">
+                    <button id="btn-check-heir" class="btn secondary-btn">Check Status</button>
+                </div>
+
+                <div id="heir-stats" class="status-container hidden">
+                    <div class="timer-box">
+                        <p class="label">Time until available</p>
+                        <h3 id="heir-countdown" class="countdown">00:00:00</h3>
+                        <button onclick="window.advanceBlockTime(31536000)" class="btn sm-btn outline-btn mt-1">Dev:
+                            Fast Forward +1 Year (Hardhat)</button>
+                    </div>
+                    <button id="btn-inherit" class="btn primary-btn mt-1" disabled>Withdraw Funds</button>
+                </div>
+                <p id="heir-msg" class="status-msg"></p>
+            </div>
+        </section>
+
+        <!-- ==============================
+             VIEW 4: Guardian Dashboard
+             ============================== -->
+        <section id="view-guardian" class="view hidden">
+            <button class="nav-back btn sm-btn outline-btn mb-1">← Back</button>
+            <div class="card glass wide">
+                <h2>Guardian <span class="accent-text">Panel</span></h2>
+
+                <div class="input-group">
+                    <label>StrongBox Address</label>
+                    <input type="text" id="guardian-sb-address" placeholder="0x...">
+                    <button id="btn-check-requests" class="btn secondary-btn">Fetch Requests</button>
+                </div>
+
+                <div id="guardian-requests" class="requests-list">
+                    <!-- Dynamic Requests Rendered Here -->
+                    <p class="placeholder-text text-center mt-2">No active requests found.</p>
+                </div>
+                <p id="guardian-msg" class="status-msg"></p>
+            </div>
+        </section>
+
+        <!-- ==============================
+             VIEW 5: Create Form
+             ============================== -->
+        <section id="view-create" class="view hidden">
+            <button class="nav-back btn sm-btn outline-btn mb-1">← Back</button>
+            <div class="card glass wide scrollable">
+                <h2>Factory: <span class="accent-text">Deploy Vault</span></h2>
+                <form id="create-sb-form" class="form-grid">
+
+                    <div class="form-group full-width">
+                        <h4>Owner Details</h4>
+                        <div class="split">
+                            <input type="email" id="f-owner-email" placeholder="Your Email (Alerts)" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group split-container full-width">
+                        <div class="split split-left">
+                            <h4>Guardian 1</h4>
+                            <input type="text" id="f-g1-address" placeholder="0x... Address" required>
+                            <input type="email" id="f-g1-email" placeholder="Email" required>
+                        </div>
+                        <div class="split split-right">
+                            <h4>Guardian 2</h4>
+                            <input type="text" id="f-g2-address" placeholder="0x... Address" required>
+                            <input type="email" id="f-g2-email" placeholder="Email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group split-container full-width">
+                        <div class="split split-left">
+                            <h4>Heir 1</h4>
+                            <input type="text" id="f-h1-address" placeholder="0x... Address" required>
+                            <input type="email" id="f-h1-email" placeholder="Email" required>
+                        </div>
+                        <div class="split split-right">
+                            <h4>Heir 2</h4>
+                            <input type="text" id="f-h2-address" placeholder="0x... Address" required>
+                            <input type="email" id="f-h2-email" placeholder="Email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width mt-1">
+                        <h4>Security Settings</h4>
+                        <label>Inactivity Time Limit (seconds)</label>
+                        <input type="number" id="f-timelimit" placeholder="e.g. 31536000 (1 year)" required>
+                    </div>
+
+                    <button type="submit" id="btn-deploy-sb" class="btn primary-btn full-width mt-1">Deploy
+                        StrongBox</button>
+                </form>
+                <p id="create-msg" class="status-msg"></p>
+            </div>
+        </section>
+
+        <!-- ==============================
+             VIEW 6: Owner StrongBox Dashboard
+             ============================== -->
+        <section id="view-owner-sb" class="view hidden">
+            <button class="nav-back btn sm-btn outline-btn mb-1">← Back</button>
+            <div class="card glass wide">
+                <div class="sb-header flex-between mb-2">
+                    <h2>Vault <span class="accent-text">Control</span></h2>
+                    <span id="sb-address-badge" class="badge">0x...</span>
+                </div>
+
+                <div class="stats-row mb-2">
+                    <div class="stat-box">
+                        <label>Vault Balance</label>
+                        <h3 id="sb-balance">0.00 <span class="unit">ETH</span></h3>
+                        <button id="btn-get-balance" class="btn sm-btn outline-btn mt-1">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="action-row split-container mb-2">
+                    <div class="split split-left boxed">
+                        <h4>Deposit Funds</h4>
+                        <input type="number" id="dep-amount" placeholder="Amount in ETH" step="0.01">
+                        <button id="btn-sb-deposit" class="btn secondary-btn full-width mt-1">Deposit</button>
+                    </div>
+                    <div class="split split-right boxed">
+                        <h4>Request Withdrawal</h4>
+                        <input type="number" id="with-amount" placeholder="Amount in ETH" step="0.01">
+                        <button id="btn-sb-withdraw" class="btn primary-btn full-width mt-1 mt-alert">Request</button>
+                    </div>
+                </div>
+
+                <div class="info-row boxed mb-1">
+                    <h4>Vault Info</h4>
+                    <p class="text-sm"><b>Heir 1:</b> <span id="info-h1" class="text-truncate">Unknown</span></p>
+                    <p class="text-sm"><b>Heir 2:</b> <span id="info-h2" class="text-truncate">Unknown</span></p>
+                    <p class="text-sm"><b>Last Active:</b> <span id="info-last-active">Never</span></p>
+                    <p class="text-sm"><b>Time Limit:</b> <span id="info-time-limit">0s</span></p>
+                </div>
+
+                <p id="owner-msg" class="status-msg text-center"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="abi.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
